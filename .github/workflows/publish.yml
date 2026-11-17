@@ -1,0 +1,56 @@
+name: Publish to PyPI (Trusted Publishing)
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write  # OIDC trusted publishing — no token needed
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build package
+        run: |
+          python -m pip install --upgrade build
+          mkdir -p fincheck_pkg
+          cp fincheck.py fincheck_pkg/__init__.py
+          touch fincheck_pkg/py.typed
+          python -m pip install setuptools wheel --quiet
+          python -c "
+import tomllib, pathlib, shutil, os
+cfg = '''
+[build-system]
+requires = [\"setuptools>=61\"]
+build-backend = \"setuptools.build_meta\"
+
+[project]
+name = \"phm-fincheck\"
+version = \"0.1.0\"
+description = \"Deterministic AI financial advice boundary checker - bilingual CN/EN rule kernel, zero dependencies\"
+readme = \"README.md\"
+requires-python = \">=3.8\"
+license = {text = \"MIT\"}
+authors = [{name = \"PHM-Audit\"}]
+keywords = [\"ai-safety\", \"finance\", \"compliance\", \"guardrail\", \"deterministic\"]
+classifiers = [\"Intended Audience :: Financial and Insurance Industry\", \"Topic :: Office/Business :: Financial\"]
+
+[tool.setuptools]
+packages = [\"fincheck_pkg\"]
+
+[tool.setuptools.package-data]
+fincheck_pkg = [\"py.typed\"]
+'''
+open('pyproject.toml','w').write(cfg)
+"
+      - name: Publish (OIDC)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
