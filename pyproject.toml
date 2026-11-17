@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "phm-fincheck"
+version = "0.1.0"
+description = "Deterministic AI financial advice boundary checker - bilingual CN/EN rule kernel, zero dependencies"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [{name = "PHM-Audit"}]
+keywords = ["ai-safety", "finance", "compliance", "guardrail", "deterministic"]
+classifiers = ["Intended Audience :: Financial and Insurance Industry", "Topic :: Office/Business :: Financial"]
+
+[tool.setuptools]
+packages = ["fincheck_pkg"]
+
+[tool.setuptools.package-data]
+fincheck_pkg = ["py.typed"]
